@@ -1,3 +1,20 @@
+Cloner la bdd
+changer son hostname 
+changer son fichier /etc/hosts 
+changer son fichier /etc/networks/interface
+reboot
+
+
+
+
+
+
+
+
+
+
+
+
 Sur le Serveur Maître (Master - 172.19.7.11):
 
     Accorder les Privilèges au Compte "root" pour la Réplication :
