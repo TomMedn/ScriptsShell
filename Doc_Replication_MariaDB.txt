@@ -1,4 +1,4 @@
-Cloner la bdd
+Cloner le serveur bdd
 changer son hostname 
 changer son fichier /etc/hosts 
 changer son fichier /etc/networks/interface
