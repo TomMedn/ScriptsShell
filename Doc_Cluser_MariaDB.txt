@@ -1,0 +1,67 @@
+Configuration du Cluster Galera avec MariaDB sous Debian
+Étape 1 : Installation de MariaDB Galera Cluster
+
+Installez MariaDB Galera Cluster sur chaque nœud du cluster en utilisant la commande suivante :
+
+bash
+
+sudo apt-get update
+sudo apt-get install mariadb-server galera-4 rsync
+
+Étape 2 : Configuration du fichier my.cnf
+
+Modifiez le fichier de configuration my.cnf sur chaque nœud pour inclure les paramètres nécessaires. Ajoutez ou modifiez les lignes suivantes :
+
+bash
+
+# Fichier de configuration my.cnf
+
+[mysqld]
+wsrep_on=ON
+wsrep_provider=/usr/lib/galera/libgalera_smm.so
+wsrep_cluster_name=my_cluster
+wsrep_cluster_address="gcomm://172.19.7.11,172.19.7.12,172.19.7.13"
+wsrep_node_address="172.19.7.x"  # Remplacez x par l'adresse du nœud respectif
+wsrep_node_name="node1"  # Changez le nom du nœud en conséquence
+
+bind-address=0.0.0.0
+
+Étape 3 : Configuration du pare-feu
+
+Assurez-vous que le pare-feu autorise la communication entre les nœuds sur le port Galera (par défaut, le port 4567) et MySQL (par défaut, le port 3306).
+Étape 4 : Initialisation du Cluster sur le Premier Nœud
+
+Sur le premier nœud (172.19.7.11), exécutez la commande suivante :
+
+bash
+
+sudo galera_new_cluster
+
+Étape 5 : Configuration des Nœuds Suivants
+
+Sur les nœuds suivants (172.19.7.12 et 172.19.7.13), modifiez le fichier my.cnf comme décrit précédemment, puis démarrez le service MariaDB :
+
+bash
+
+sudo systemctl start mariadb
+
+Étape 6 : Vérification du Cluster
+
+Connectez-vous au nœud initial et vérifiez le statut du cluster :
+
+bash
+
+mysql -u root -p -e "SHOW STATUS LIKE 'wsrep%';"
+
+Assurez-vous que le statut wsrep_cluster_size est égal au nombre de nœuds du cluster.
+Étape 7 : Vérification de la Réplication
+
+Vous pouvez également vérifier le statut de la réplication en exécutant la requête suivante sur chaque nœud :
+
+bash
+
+mysql -u root -p -e "SHOW SLAVE STATUS\G;"
+
+Assurez-vous que le statut de Galera est sain sur tous les nœuds.
+
+Cela devrait mettre en place un cluster Galera avec MariaDB sur les adresses IP spécifiées. N'oubliez pas de personnaliser les noms de cluster, les adresses IP, les noms de nœuds et les autres paramètres en fonction de votre configuration.
