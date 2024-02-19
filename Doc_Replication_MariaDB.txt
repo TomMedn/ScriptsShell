@@ -1,0 +1,60 @@
+Sur le Serveur Maître (Master - 172.19.7.11):
+
+    Accorder les Privilèges au Compte "root" pour la Réplication :
+
+    Connectez-vous à MariaDB sur le serveur maître en tant que "root" ou un autre utilisateur avec des privilèges suffisants et exécutez les commandes SQL suivantes :
+
+    sql
+
+GRANT REPLICATION SLAVE ON *.* TO 'root'@'%' IDENTIFIED BY 'admin';
+FLUSH PRIVILEGES;
+
+Cette commande accorde les privilèges de réplication à l'utilisateur "root" depuis n'importe quelle adresse IP.
+
+Vérifier le Statut du Master :
+
+Exécutez la commande suivante pour obtenir les informations nécessaires pour configurer le serveur esclave :
+
+sql
+
+    SHOW MASTER STATUS;
+
+    Notez les valeurs de File et Position qui seront utilisées pour configurer le serveur esclave.
+
+Sur le Serveur Esclave:
+
+    Configurer la Réplication sur le Serveur Esclave :
+
+    Connectez-vous à MariaDB sur le serveur esclave et exécutez les commandes SQL suivantes en utilisant les valeurs notées précédemment :
+
+    sql
+
+STOP SLAVE;
+CHANGE MASTER TO
+  MASTER_HOST='172.19.7.11',
+  MASTER_USER='root',
+  MASTER_PASSWORD='admin',
+  MASTER_LOG_FILE='valeur_de_File_du_MASTER_STATUS',
+  MASTER_LOG_POS=valeur_de_Position_du_MASTER_STATUS;
+
+START SLAVE;
+
+Remplacez 'valeur_de_File_du_MASTER_STATUS' et 'valeur_de_Position_du_MASTER_STATUS' par les valeurs appropriées obtenues à partir du statut du maître.
+
+Vérifier l'État de la Réplication :
+
+Exécutez la commande suivante pour vérifier l'état de la réplication sur le serveur esclave :
+
+sql
+
+SHOW SLAVE STATUS\G;
+
+Assurez-vous que Slave_IO_Running et Slave_SQL_Running sont à Yes.
+Vérifier le Fichier de Configuration MySQL :
+Assurez-vous que le fichier de configuration MySQL (my.cnf) sur le serveur maître ne limite pas les connexions à une adresse IP spécifique. Vous pouvez vérifier cela en examinant le fichier de configuration :
+
+bash
+
+sudo nano /etc/mysql/my.cnf
+
+Recherchez les paramètres bind-address et assurez-vous qu'il est configuré pour écouter toutes les adresses IP (0.0.0.0 ou commentez-le).
