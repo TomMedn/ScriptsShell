@@ -15,7 +15,8 @@ CREATE TABLE IF NOT EXISTS Utilisateurs (
     Nom VARCHAR(255),
     Embauche DATE,
     Telephone VARCHAR(20),
-    Fincontrat DATE
+    Fincontrat DATE,
+    MotDePasse VARCHAR(255)
 );
 EOF
 
@@ -27,7 +28,7 @@ CHARACTER SET utf8
 FIELDS TERMINATED BY '\t' ENCLOSED BY '"'
 LINES TERMINATED BY '\n'
 IGNORE 1 LINES
-(Departement, Prenom, Nom, @Embauche, Telephone, @Fincontrat)
+(Departement, Prenom, Nom, @Embauche, Telephone, @Fincontrat, MotDePasse)
 SET Embauche = STR_TO_DATE(@Embauche, '%d/%m/%Y'),
     Fincontrat = STR_TO_DATE(@Fincontrat, '%d/%m/%Y');
 EOF
