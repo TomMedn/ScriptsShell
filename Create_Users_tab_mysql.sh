@@ -1,14 +1,15 @@
 #!/bin/bash
-#ce script crée une table Utilisateurs, dans laquelle se trouve le contenu de users_data.txt, changer les credentials au besoinn
+# Ce script crée une table Utilisateurs, dans laquelle se trouve le contenu de users_data.txt. Changer les credentials au besoin.
 
 # MySQL credentials
 MYSQL_USER="root"
 MYSQL_PASSWORD="admin"
 MYSQL_DATABASE="Medigroup"
 
-# create table
+# Création de la table avec une clé primaire
 mysql -u $MYSQL_USER -p$MYSQL_PASSWORD $MYSQL_DATABASE <<EOF
 CREATE TABLE IF NOT EXISTS Utilisateurs (
+    ID INT AUTO_INCREMENT PRIMARY KEY,
     Departement VARCHAR(255),
     Prenom VARCHAR(255),
     Nom VARCHAR(255),
@@ -18,7 +19,7 @@ CREATE TABLE IF NOT EXISTS Utilisateurs (
 );
 EOF
 
-# load data from users_data.txt
+# Chargement des données depuis users_data.txt
 mysql -u $MYSQL_USER -p$MYSQL_PASSWORD $MYSQL_DATABASE <<EOF
 LOAD DATA LOCAL INFILE 'users_data.txt'
 INTO TABLE Utilisateurs
