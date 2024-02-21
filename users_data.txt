@@ -9,3 +9,4 @@ R&D	Zorita	Morgan	25/02/2020	02086180838	01/06/2024
 R&D	Yardley	Gill	26/02/2020	0437900782	01/06/2024
 Informatique	Elijah	Joyce	16/02/2020	0426506680	01/06/2024
 Informatique	Shannon	Sharp	20/04/2021	0226048533	02/02/2024
+Informatique  Gauguin  Freegun  21/02/2024  123456789  31/08/2024
