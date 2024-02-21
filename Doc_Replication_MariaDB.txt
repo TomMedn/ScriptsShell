@@ -1,77 +1,80 @@
-Cloner le serveur bdd
-changer son hostname 
-changer son fichier /etc/hosts 
-changer son fichier /etc/networks/interface
-reboot
-
-
-
-
-
-
-
-
-
-
-
-
-Sur le Serveur Maître (Master - 172.19.7.11):
-
-    Accorder les Privilèges au Compte "root" pour la Réplication :
-
-    Connectez-vous à MariaDB sur le serveur maître en tant que "root" ou un autre utilisateur avec des privilèges suffisants et exécutez les commandes SQL suivantes :
-
-    sql
-
 GRANT REPLICATION SLAVE ON *.* TO 'root'@'%' IDENTIFIED BY 'admin';
 FLUSH PRIVILEGES;
 
-Cette commande accorde les privilèges de réplication à l'utilisateur "root" depuis n'importe quelle adresse IP.
 
-Vérifier le Statut du Master :
-
-Exécutez la commande suivante pour obtenir les informations nécessaires pour configurer le serveur esclave :
-
-sql
-
-    SHOW MASTER STATUS;
-
-    Notez les valeurs de File et Position qui seront utilisées pour configurer le serveur esclave.
-
-Sur le Serveur Esclave:
-
-    Configurer la Réplication sur le Serveur Esclave :
-
-    Connectez-vous à MariaDB sur le serveur esclave et exécutez les commandes SQL suivantes en utilisant les valeurs notées précédemment :
-
-    sql
 
 STOP SLAVE;
 CHANGE MASTER TO
   MASTER_HOST='172.19.7.11',
   MASTER_USER='root',
   MASTER_PASSWORD='admin',
-  MASTER_LOG_FILE='valeur_de_File_du_MASTER_STATUS',
-  MASTER_LOG_POS=valeur_de_Position_du_MASTER_STATUS;
+  MASTER_LOG_FILE='mariadb-bin.000003',
+  MASTER_LOG_POS=1281;
 
 START SLAVE;
 
-Remplacez 'valeur_de_File_du_MASTER_STATUS' et 'valeur_de_Position_du_MASTER_STATUS' par les valeurs appropriées obtenues à partir du statut du maître.
 
-Vérifier l'État de la Réplication :
+[mysqld]
+wsrep_on=ON
+wsrep_provider=/usr/lib/galera/libgalera_smm.so
+wsrep_cluster_name=medicluster
+wsrep_cluster_address="gcomm://172.19.7.11,172.19.7.12,172.19.7.13"
+wsrep_node_address="172.19.7.11"
+wsrep_node_name="node1"
 
-Exécutez la commande suivante pour vérifier l'état de la réplication sur le serveur esclave :
 
-sql
+FLUSH PRIVILEGES;
+ALTER USER 'root'@'localhost' IDENTIFIED BY 'admin';
+EXIT;
+GRANT ALL PRIVILEGES ON *.* TO 'root'@'localhost' IDENTIFIED BY 'admin' WITH GRANT OPTION;
+FLUSH PRIVILEGES;
 
-SHOW SLAVE STATUS\G;
 
-Assurez-vous que Slave_IO_Running et Slave_SQL_Running sont à Yes.
-Vérifier le Fichier de Configuration MySQL :
-Assurez-vous que le fichier de configuration MySQL (my.cnf) sur le serveur maître ne limite pas les connexions à une adresse IP spécifique. Vous pouvez vérifier cela en examinant le fichier de configuration :
+===== 21 02 2024 ======
+apt update
+apt install mariadb-server
+apt install galera-4
+mysql -u root -p
+ls /etc/mysql/mariadb.conf.d/
 
-bash
+Voici la configuration que je vous propose d'utiliser au sein du fichier "60-galera.cnf"'
+==============================
+[galera]
+# Mandatory settings
+wsrep_on = ON
+wsrep_provider = /usr/lib/galera/libgalera_smm.so
+wsrep_cluster_name = "Galera_Cluster_Medigroup"
+wsrep_cluster_address = gcomm://172.19.7.11,172.19.7.12,172.19.7.13
+binlog_format = row
+default_storage_engine = InnoDB
+innodb_autoinc_lock_mode = 2
+innodb_force_primary_key = 1
 
-sudo nano /etc/mysql/my.cnf
+# Allow server to accept connections on all interfaces.
+bind-address = 0.0.0.0
 
-Recherchez les paramètres bind-address et assurez-vous qu'il est configuré pour écouter toutes les adresses IP (0.0.0.0 ou commentez-le).
+# Optional settings
+#wsrep_slave_threads = 1
+#innodb_flush_log_at_trx_commit = 0
+log_error = /var/log/mysql/error-galera.log
+==============================
+
+
+==============================Démarrer le cluster Galera
+
+sudo systemctl stop mariadb
+sudo galera_new_cluster
+mysql -u root -p
+show status like 'wsrep_cluster_size';
+
+---> verifier que le resultat donne 1
+
+==============================Ajouter des nœuds au cluster Galera
+il faut mettre la meme config dans 60-galera sur chaque serveur.
+ensuite
+nano /etc/mysql/mariadb.conf.d/50-server.cnf
+bind-address = 0.0.0.0
+
+
+GRANT SELECT ON Medigroup.Utilisateurs TO 'root'@'172.19.5.11';
+FLUSH PRIVILEGES;
