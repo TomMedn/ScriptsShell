@@ -1,5 +1,4 @@
 #!/bin/bash
-# Ce script crée une table Utilisateurs, dans laquelle se trouve le contenu de users_data.txt. Changer les credentials au besoin.
 
 # MySQL credentials
 MYSQL_USER="root"
@@ -28,7 +27,8 @@ CHARACTER SET utf8
 FIELDS TERMINATED BY '\t' ENCLOSED BY '"'
 LINES TERMINATED BY '\n'
 IGNORE 1 LINES
-(Departement, Prenom, Nom, @Embauche, Telephone, @Fincontrat, MotDePasse)
+(Departement, Prenom, Nom, @Embauche, Telephone, @Fincontrat, @MotDePasse)
 SET Embauche = STR_TO_DATE(@Embauche, '%d/%m/%Y'),
-    Fincontrat = STR_TO_DATE(@Fincontrat, '%d/%m/%Y');
+    Fincontrat = STR_TO_DATE(@Fincontrat, '%d/%m/%Y'),
+    MotDePasse = SHA2(@MotDePasse, 256);
 EOF
