@@ -1,3 +1,5 @@
+#Sur le serveur MARIADB ne pas oublier de GRANT ACCESS à l'IP du serveur WEB
+
 # Importer le module Active Directory
 Import-Module ActiveDirectory
 
